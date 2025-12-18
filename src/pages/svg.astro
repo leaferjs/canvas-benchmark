@@ -1,0 +1,9 @@
+---
+import CompareLayout from '../layouts/CompareLayout.astro'
+---
+
+<CompareLayout engine="svg" />
+<script>
+  import { SVGCase } from '../benchmarks/svg'
+  new SVGCase({ id: 'view' })
+</script>

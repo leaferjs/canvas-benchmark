@@ -1,0 +1,9 @@
+---
+import CompareLayout from '../layouts/CompareLayout.astro'
+---
+
+<CompareLayout engine="html" />
+<script>
+  import { HTMLCase } from '../benchmarks/html'
+  new HTMLCase({ id: 'view' })
+</script>

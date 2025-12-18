@@ -1,0 +1,22 @@
+{
+  "name": "canvas-performance-benchmarks",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "astro": "^5.16.5",
+    "fabric": "^6.9.1",
+    "konva": "^10.0.12",
+    "leafer-ui": "^1.12.0",
+    "pixi.js": "^8.14.3",
+    "stats.js": "^0.17.0"
+  },
+  "devDependencies": {
+    "sass": "^1.96.0"
+  }
+}

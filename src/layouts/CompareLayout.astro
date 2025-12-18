@@ -1,0 +1,359 @@
+---
+import Layout from './Layout.astro'
+import { enginesData } from '../benchmarks/config'
+
+const { engine } = Astro.props
+const {
+  engineList,
+  engineNameMap,
+  engineColorMap,
+  engineSiteMap,
+  modeList,
+  modeNameMap,
+  sceneList,
+  sceneNameMap,
+  zoomList,
+  zoomNameMap,
+  totalList,
+  totalNameMap,
+} = enginesData
+---
+
+<Layout title={engine} keywords="" description="">
+  <div id="engines">
+    <a
+      href="/"
+      target="_blank"
+      class="case-button engine"
+      style="color: black"
+      onclick="try { self.close() } catch (e) {}"
+    >
+      canvas-benchmark
+    </a>
+    {
+      engineList.map((item) =>
+        engine !== item ? (
+          <a
+            target="_blank"
+            data-engine={item}
+            class="case-button engine"
+            onclick="try { self.close() } catch (e) {}"
+          >
+            {engineNameMap[item]}
+          </a>
+        ) : (
+          <a
+            class="case-button selected"
+            style={'color:' + engineColorMap[item]}
+          >
+            {engineNameMap[item]}
+          </a>
+        )
+      )
+    }
+    <a
+      id="more-engine-button"
+      href="/"
+      target="_blank"
+      class="case-button engine"
+      onclick="return false"
+    >
+      more
+    </a>
+  </div>
+
+  <div>
+    {
+      sceneList.map((item) => (
+        <a
+          data-engine={engine}
+          data-scene={item}
+          data-color={engineColorMap[engine]}
+          target="_blank"
+          class="case-button scene"
+          onclick="try { self.close() } catch (e) {}"
+        >
+          {sceneNameMap[item]}
+        </a>
+      ))
+    }
+    <a
+      id="more-scene-button"
+      href="/"
+      target="_blank"
+      class="case-button scene"
+      onclick="return false"
+    >
+      more
+    </a>
+  </div>
+
+  <div>
+    {
+      totalList.map((item) => (
+        <a
+          data-engine={engine}
+          data-total={item}
+          data-color={engineColorMap[engine]}
+          target="_blank"
+          class="case-button total"
+          onclick="try { self.close() } catch (e) {}"
+        >
+          {totalNameMap[item]}
+        </a>
+      ))
+    }
+  </div>
+
+  <div>
+    {
+      modeList.map((item) => (
+        <a
+          data-engine={engine}
+          data-mode={item}
+          data-color={engineColorMap[engine]}
+          target="_blank"
+          class="case-button mode"
+          onclick="try { self.close() } catch (e) {}"
+        >
+          {modeNameMap[item]}
+        </a>
+      ))
+    }
+    <span>&nbsp;&nbsp;</span>
+    {
+      zoomList.map((item) => (
+        <a
+          data-engine={engine}
+          data-zoom={item}
+          data-color={engineColorMap[engine]}
+          target="_blank"
+          class="case-button zoom"
+          onclick="try { self.close() } catch (e) {}"
+        >
+          {zoomNameMap[item]}
+        </a>
+      ))
+    }
+
+    <span>&nbsp;&nbsp;</span>
+    <a
+      href={engineSiteMap[engine]}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="case-button zoom"
+    >
+      🔗 visit {engineNameMap[engine]} website
+    </a>
+  </div>
+
+  <a
+    id="github-button"
+    href="https://github.com/leaferjs/canvas-benchmark"
+    aria-label="github"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
+      ><title>GitHub</title><path
+        d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"
+      ></path></svg
+    >
+    Source Code
+  </a>
+
+  <div id="memory">JS Memory</div>
+  <div id="time">First Time</div>
+
+  <div id="view"></div>
+</Layout>
+<script>
+  import { siteConfig, enginesData } from '../benchmarks/config'
+  import { getUrlParam, getId } from '../benchmarks/core/h5'
+
+  const { defaultScene, defaultMode, defaultZoom, defaultTotal } = enginesData
+
+  window.addEventListener('load', () => {
+    const sceneParam = getUrlParam('scene'),
+      scene = sceneParam || defaultScene
+    const modeParam = getUrlParam('mode'),
+      mode = modeParam || defaultMode
+    const zoomParam = getUrlParam('zoom'),
+      zoom = zoomParam || defaultZoom
+    const totalParam = getUrlParam('total'),
+      total = totalParam || String(defaultTotal)
+
+    function getButtonLink(button: Element): string {
+      const engineName = button.getAttribute('data-engine')
+      let sceneName = button.getAttribute('data-scene')
+      let modeName = button.getAttribute('data-mode')
+      let zoomName = button.getAttribute('data-zoom')
+      let totalName = button.getAttribute('data-total')
+      const color = button.getAttribute('data-color')
+      if (
+        sceneName === scene ||
+        modeName === mode ||
+        zoomName === zoom ||
+        totalName === total
+      ) {
+        button.classList.add('selected')
+        ;(button as HTMLElement).style.color = color as string
+        return ''
+      } else {
+        const params = []
+        if ((sceneName = sceneName || sceneParam) && sceneName !== defaultScene)
+          params.push('scene=' + sceneName)
+        if ((modeName = modeName || modeParam) && modeName !== defaultMode)
+          params.push('mode=' + modeName)
+        if ((zoomName = zoomName || zoomParam) && zoomName !== defaultZoom)
+          params.push('zoom=' + zoomName)
+        if (
+          (totalName = totalName || totalParam) &&
+          totalName !== String(defaultTotal)
+        )
+          params.push('total=' + totalName)
+        return params.length
+          ? siteConfig.baseDir + '/' + engineName + '?' + params.join('&')
+          : siteConfig.baseDir + '/' + engineName + ''
+      }
+    }
+
+    ;['.engine', '.scene', '.mode', '.zoom', '.total'].forEach((name) => {
+      document.querySelectorAll(name).forEach((item) => {
+        if (!item.getAttribute('href'))
+          item.setAttribute('href', getButtonLink(item))
+      })
+    })
+
+    getId('more-engine-button').addEventListener('click', () => {
+      alert(
+        'More Canvas engines will be continuously updated. \n\n 更多Canvas引擎将会持续更新。'
+      )
+    })
+
+    getId('more-scene-button').addEventListener('click', () => {
+      alert(
+        'More test scenarios will be continuously updated. \n\n 更多测试场景将会持续更新。'
+      )
+    })
+
+    getId('memory').addEventListener('click', () => {
+      alert(
+        `Currently, only the JS thread memory is displayed. To view SVG/HTML memory usage, use the browser's memory manager: Chrome (Window > Task Manager), Edge (More tools > Browser Task Manager). \n\n当前显示仅为JS线程内存，SVG/HTML需通过浏览器查看内存占用: Chrome（窗口 > 任务管理器）， Edge（更多工具 > 浏览器任务管理器）。`
+      )
+    })
+    getId('time').addEventListener('click', () => {
+      alert(
+        `Currently displayed as the first-screen rendering time. \n\n 当前显示为首屏渲染时间。`
+      )
+    })
+  })
+</script>
+<style lang="scss">
+  body {
+    font-family: 'SF Mono', 'Monaco', 'Consolas', 'Courier New', monospace;
+  }
+
+  #view {
+    position: absolute !important;
+    top: 150px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    background-color: #f2f2f2;
+    overflow: hidden;
+  }
+
+  #engines {
+    padding-top: 15px;
+  }
+
+  .engine,
+  .scene,
+  .total,
+  .mode,
+  .zoom {
+    display: inline-block;
+    padding: 5px 10px;
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    cursor: pointer;
+    color: #555;
+    transition: color 0.3s;
+    &:hover {
+      color: #000;
+    }
+  }
+
+  .scene {
+    padding: 0px 10px;
+    display: inline-block;
+    font-size: 14px;
+    color: #888;
+    &:hover {
+      color: #111;
+    }
+  }
+
+  .total,
+  .mode,
+  .zoom {
+    padding: 0px 10px;
+    font-size: 12px;
+    color: #777;
+    &:hover {
+      color: #111;
+    }
+  }
+
+  #memory {
+    position: fixed;
+    top: 185px;
+    left: 95px;
+    color: #db0087b3;
+    font-size: 10px;
+    z-index: 10000000;
+    cursor: pointer;
+    transition: color 0.3s;
+    &:hover {
+      color: #db0087;
+    }
+  }
+
+  #time {
+    position: fixed;
+    top: 185px;
+    left: 175px;
+    color: #04db009f;
+    font-size: 10px;
+    z-index: 10000000;
+    cursor: pointer;
+    transition: color 0.3s;
+    &:hover {
+      color: #04db00;
+    }
+  }
+
+  #github-button {
+    position: absolute;
+    top: 32px;
+    right: 20px;
+    fill: #777;
+    color: #777;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: fill 0.3s;
+    font-size: 10px;
+    font-weight: bold;
+    svg {
+      width: 60px;
+      margin-bottom: 10px;
+    }
+    &:hover {
+      fill: #000;
+      color: #000;
+    }
+  }
+</style>

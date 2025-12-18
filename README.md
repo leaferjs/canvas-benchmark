@@ -13,3 +13,9 @@ Provides performance test comparisons for practical use cases including element 
 [PixiJS](https://pixijs.com)、[Konva.js](https://konvajs.org)、[Fabric.js](http://fabricjs.com)、SVG、HTML、[LeaferJS](https://www.leaferjs.com/)
 
 提供创建元素、缩放视图、平移视图、拖拽元素、全动态元素、大图缩放等实用场景的性能测试对比。
+
+## License
+
+MIT 开源许可协议。
+
+Copyright © 2025-present Chao (Leafer) Wan

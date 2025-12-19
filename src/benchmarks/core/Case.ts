@@ -16,12 +16,12 @@ interface NoParamFunction {
 interface IDragPoint {
     x: number
     y: number
-    direction: 'right' | 'left'
+    direction: 'right' | 'left' | 'wait-right'
 }
 
 interface IScaleData {
     value: number
-    mode: 'in' | 'out'
+    mode: 'in' | 'out' | 'wait-in' | 'wait-out'
 }
 
 const { defaultScene, defaultMode, defaultZoom, defaultTotal } = enginesData
@@ -52,6 +52,7 @@ export class Case {
     public view!: HTMLElement
 
     public created?: boolean
+    public viewCompleted?: boolean
 
     public width = 1000
     public height = 500
@@ -87,8 +88,8 @@ export class Case {
             this.createStats()
 
             this.firstPaintStart()
-            await this.create()
 
+            await this.create()
             this.createAnimate()
         })
     }
@@ -104,6 +105,7 @@ export class Case {
                 break
             case 'largeImage':
                 await this.createLargeImage()
+                this.params.total = 1
                 break
             case 'svg':
                 await this.createSvgImages()
@@ -160,9 +162,16 @@ export class Case {
     }
 
     public firstPaintEnd() {
-        this.firstPaintStats.end()
         requestAnimationFrame(() => {
-            if (this.params.zoom === 'fit') this.setAppScale(this.fitScale, 0, 0)
+            this.firstPaintStats.end()
+            if (this.params.zoom === 'fit') {
+                this.setAppScale(this.fitScale, 0, 0)
+                requestAnimationFrame(() => {
+                    this.viewCompleted = true
+                })
+            } else {
+                this.viewCompleted = true
+            }
         })
     }
 
@@ -193,6 +202,9 @@ export class Case {
                 this.flatChildren = true
                 this.dynamicMode = true
                 break
+            case 'pan':
+                if (params.zoom === 'fit') this.dragPoint.direction = 'wait-right'
+                break
         }
     }
 
@@ -220,7 +232,7 @@ export class Case {
     public createAnimate() {
         const animate = () => {
             this.stats.update()
-            if (this.created) this.animate()
+            if (this.viewCompleted) this.animate()
             requestAnimationFrame(animate)
         }
         animate()
@@ -250,19 +262,45 @@ export class Case {
 
     public zoomAnimate() {
         const { scaleData } = this
-        if (scaleData.value > this.fitScale) {
-            scaleData.mode = 'out'
+
+        if (scaleData.value >= this.fitScale) {
+
+            if (!scaleData.mode.includes('out')) {
+                scaleData.mode = 'wait-out'
+                setTimeout(() => {
+                    scaleData.mode = 'out'
+                }, Math.max(this.params.total / 10000 * 39))
+            }
+
         } else if (scaleData.value < this.fitScale / 2) {
-            scaleData.mode = 'in'
+
+            if (!scaleData.mode.includes('in')) {
+                scaleData.mode = 'wait-in'
+                setTimeout(() => {
+                    scaleData.mode = 'in'
+                }, Math.max(this.params.total / 10000 * 39, 200))
+            }
+
         }
 
-        scaleData.value *= scaleData.mode === 'in' ? 1.01 : 0.99
-        this.setAppScale(scaleData.value, 0, 0)
+        if (!scaleData.mode.includes('wait')) {
+            scaleData.value *= scaleData.mode === 'in' ? 1.05 : 0.95
+            this.setAppScale(scaleData.value, 0, 0)
+        }
     }
 
     public panAnimate() {
-        this.autoDragPoint(this.dragPoint)
-        this.setAppPosition(this.dragPoint.x, this.dragPoint.y)
+        const { dragPoint } = this
+        if (dragPoint.direction === 'wait-right') {
+            setTimeout(() => {
+                dragPoint.direction = 'right'
+            }, 200)
+        }
+
+        if (!dragPoint.direction.includes('wait')) {
+            this.autoDragPoint(this.dragPoint)
+            this.setAppPosition(this.dragPoint.x, this.dragPoint.y)
+        }
     }
 
     public dragAnimate() {
@@ -314,7 +352,9 @@ export class Case {
         } else if (point.x < 0) {
             point.direction = 'right'
         }
-        point.x += Math.ceil(Math.random() * (point.direction === 'right' ? 20 : -20))
+
+        const rand = this.params.scene === 'drag' ? 1 : Math.random()
+        point.x += Math.ceil(rand * (point.direction === 'right' ? 20 : -20))
     }
 
     // simulated reality interaction

@@ -20,131 +20,133 @@ const {
 ---
 
 <Layout title={engine} keywords="" description="">
-  <div id="engines">
-    <a
-      href="/"
-      target="_blank"
-      class="case-button engine"
-      style="color: black"
-      onclick="try { self.close() } catch (e) {}"
-    >
-      canvas-benchmark
-    </a>
-    {
-      engineList.map((item) =>
-        engine !== item ? (
+  <div id="nav">
+    <div id="engines">
+      <a
+        href="/"
+        target="_blank"
+        class="case-button engine"
+        style="color: black"
+        onclick="try { self.close() } catch (e) {}"
+      >
+        Canvas-Benchmark
+      </a>
+      {
+        engineList.map((item) =>
+          engine !== item ? (
+            <a
+              target="_blank"
+              data-engine={item}
+              class="case-button engine"
+              onclick="try { self.close() } catch (e) {}"
+            >
+              {engineNameMap[item]}
+            </a>
+          ) : (
+            <a
+              class="case-button selected"
+              style={'color:' + engineColorMap[item]}
+            >
+              {engineNameMap[item]}
+            </a>
+          )
+        )
+      }
+      <a
+        id="more-engine-button"
+        href="/"
+        target="_blank"
+        class="case-button engine"
+        onclick="return false"
+      >
+        more
+      </a>
+    </div>
+
+    <div>
+      {
+        sceneList.map((item) => (
           <a
+            data-engine={engine}
+            data-scene={item}
+            data-color={engineColorMap[engine]}
             target="_blank"
-            data-engine={item}
-            class="case-button engine"
+            class="case-button scene"
             onclick="try { self.close() } catch (e) {}"
           >
-            {engineNameMap[item]}
+            {sceneNameMap[item]}
           </a>
-        ) : (
+        ))
+      }
+      <a
+        id="more-scene-button"
+        href="/"
+        target="_blank"
+        class="case-button scene"
+        onclick="return false"
+      >
+        more
+      </a>
+    </div>
+
+    <div>
+      {
+        totalList.map((item) => (
           <a
-            class="case-button selected"
-            style={'color:' + engineColorMap[item]}
+            data-engine={engine}
+            data-total={item}
+            data-color={engineColorMap[engine]}
+            target="_blank"
+            class="case-button total"
+            onclick="try { self.close() } catch (e) {}"
           >
-            {engineNameMap[item]}
+            {totalNameMap[item]}
           </a>
-        )
-      )
-    }
-    <a
-      id="more-engine-button"
-      href="/"
-      target="_blank"
-      class="case-button engine"
-      onclick="return false"
-    >
-      more
-    </a>
-  </div>
+        ))
+      }
+    </div>
 
-  <div>
-    {
-      sceneList.map((item) => (
-        <a
-          data-engine={engine}
-          data-scene={item}
-          data-color={engineColorMap[engine]}
-          target="_blank"
-          class="case-button scene"
-          onclick="try { self.close() } catch (e) {}"
-        >
-          {sceneNameMap[item]}
-        </a>
-      ))
-    }
-    <a
-      id="more-scene-button"
-      href="/"
-      target="_blank"
-      class="case-button scene"
-      onclick="return false"
-    >
-      more
-    </a>
-  </div>
+    <div>
+      {
+        modeList.map((item) => (
+          <a
+            data-engine={engine}
+            data-mode={item}
+            data-color={engineColorMap[engine]}
+            target="_blank"
+            class="case-button mode"
+            onclick="try { self.close() } catch (e) {}"
+          >
+            {modeNameMap[item]}
+          </a>
+        ))
+      }
+      <span>&nbsp;&nbsp;</span>
+      {
+        zoomList.map((item) => (
+          <a
+            data-engine={engine}
+            data-zoom={item}
+            data-color={engineColorMap[engine]}
+            target="_blank"
+            class="case-button zoom"
+            onclick="try { self.close() } catch (e) {}"
+          >
+            {zoomNameMap[item]}
+          </a>
+        ))
+      }
 
-  <div>
-    {
-      totalList.map((item) => (
-        <a
-          data-engine={engine}
-          data-total={item}
-          data-color={engineColorMap[engine]}
-          target="_blank"
-          class="case-button total"
-          onclick="try { self.close() } catch (e) {}"
-        >
-          {totalNameMap[item]}
-        </a>
-      ))
-    }
-  </div>
-
-  <div>
-    {
-      modeList.map((item) => (
-        <a
-          data-engine={engine}
-          data-mode={item}
-          data-color={engineColorMap[engine]}
-          target="_blank"
-          class="case-button mode"
-          onclick="try { self.close() } catch (e) {}"
-        >
-          {modeNameMap[item]}
-        </a>
-      ))
-    }
-    <span>&nbsp;&nbsp;</span>
-    {
-      zoomList.map((item) => (
-        <a
-          data-engine={engine}
-          data-zoom={item}
-          data-color={engineColorMap[engine]}
-          target="_blank"
-          class="case-button zoom"
-          onclick="try { self.close() } catch (e) {}"
-        >
-          {zoomNameMap[item]}
-        </a>
-      ))
-    }
-
-    <span>&nbsp;&nbsp;</span>
-    <a
-      href={engineSiteMap[engine]}
-      target="_blank"
-      rel="noopener noreferrer"
-      class="case-button zoom"
-    >
-      🔗 visit {engineNameMap[engine]} website
-    </a>
+      <span>&nbsp;&nbsp;</span>
+      <a
+        href={engineSiteMap[engine]}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="case-button zoom"
+      >
+        🔗 visit {engineNameMap[engine]} website
+      </a>
+    </div>
   </div>
 
   <a
@@ -159,7 +161,7 @@ const {
         d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"
       ></path></svg
     >
-    Source Code
+    View Source Code
   </a>
 
   <div id="memory">JS Memory</div>
@@ -256,16 +258,21 @@ const {
 
   #view {
     position: absolute !important;
-    top: 150px;
-    left: 0px;
-    right: 0px;
-    bottom: 0px;
+    top: 180px;
+    left: 20px;
+    right: 20px;
+    bottom: 20px;
     background-color: #f2f2f2;
     overflow: hidden;
   }
 
+  #nav {
+    padding-top: 20px;
+    padding-left: 10px;
+  }
+
   #engines {
-    padding-top: 15px;
+    margin-bottom: 8px;
   }
 
   .engine,
@@ -290,6 +297,7 @@ const {
     padding: 0px 10px;
     display: inline-block;
     font-size: 14px;
+    font-weight: normal;
     color: #888;
     &:hover {
       color: #111;
@@ -302,6 +310,7 @@ const {
     padding: 0px 10px;
     font-size: 12px;
     color: #777;
+    font-weight: normal;
     &:hover {
       color: #111;
     }
@@ -309,8 +318,8 @@ const {
 
   #memory {
     position: fixed;
-    top: 185px;
-    left: 95px;
+    top: 205px;
+    left: 105px;
     color: #db0087b3;
     font-size: 10px;
     z-index: 10000000;
@@ -323,8 +332,8 @@ const {
 
   #time {
     position: fixed;
-    top: 185px;
-    left: 175px;
+    top: 205px;
+    left: 185px;
     color: #04db009f;
     font-size: 10px;
     z-index: 10000000;
@@ -337,7 +346,7 @@ const {
 
   #github-button {
     position: absolute;
-    top: 32px;
+    top: 47px;
     right: 20px;
     fill: #777;
     color: #777;

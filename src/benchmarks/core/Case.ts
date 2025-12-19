@@ -133,8 +133,8 @@ export class Case {
         const stats = this.stats = new Stats()
         const dom = stats.dom as HTMLDivElement
         dom.style.pointerEvents = 'none'
-        dom.style.left = '10px'
-        dom.style.top = '160px'
+        dom.style.left = '20px'
+        dom.style.top = '180px'
         dom.style.display = 'flex'
         const children = dom.childNodes as any as HTMLCanvasElement[]
         children.forEach((item) => { item.style.display = 'block' })
@@ -147,8 +147,8 @@ export class Case {
         stats.showPanel(1)
         const dom = stats.dom as HTMLDivElement
         dom.style.pointerEvents = 'none'
-        dom.style.left = '170px'
-        dom.style.top = '160px'
+        dom.style.left = '180px'
+        dom.style.top = '180px'
         dom.style.display = 'flex'
         document.body.appendChild(dom)
     }

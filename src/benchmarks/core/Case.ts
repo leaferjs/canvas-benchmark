@@ -50,6 +50,7 @@ export class Case {
     public app: any
     public canvas!: HTMLElement
     public view!: HTMLElement
+    public rootNode!: any
 
     public created?: boolean
     public viewCompleted?: boolean
@@ -113,13 +114,50 @@ export class Case {
             case 'largeSvg':
                 await this.createLargeSvgImage()
                 break
+            case 'drag':
+                this.dragPoint.y = this.flatChildren ? this.startY - 5 : -5
             default:
                 this.createRects()
         }
         this.created = true
     }
 
-    public createRects(): void { }
+    public createRects(): void {
+        const { rootNode } = this
+        const { tenThousand, thousand, size, column, x, y } = this.getCreateLayout()
+
+        let group, startX: number, startY: number, color: string, lastThousand: number
+
+        for (var i = 0; i < tenThousand; i++) {
+
+            startX = x + size * (i % column)
+            startY = y + size * Math.floor(i / column)
+            color = this.getRotationColor(i * 3)
+            lastThousand = i === tenThousand - 1 ? thousand : 0
+
+            if (this.flatChildren) {
+                this.createRect(rootNode, startX, startY, color, lastThousand)
+            } else {
+                group = this.addGroup(rootNode, startX, startY)
+                this.createRect(group, 0, 0, color, lastThousand)
+            }
+
+        }
+    }
+
+    public createRect(parent: any, startX: number, startY: number, hsl: string, thousand: number): void {
+        let y, yCount = thousand ? thousand * 10 : 100
+        for (let i = 0; i < 100; i++) { // ten thousand
+            if (i % 10 === 0) startX += 10
+            y = startY
+            for (var j = 0; j < yCount; j++) {
+                if (j % 10 === 0) y += 10
+                this.addRect(parent, startX, y, 10, 10, hsl)
+                y += 12
+            }
+            startX += 12
+        }
+    }
 
     public async createImages() { }
 
@@ -128,6 +166,14 @@ export class Case {
     public async createSvgImages() { }
 
     public async createLargeSvgImage() { }
+
+    // add
+
+    public addGroup(_parent: any, _x: number, _y: number): any { }
+
+    public addRect(_parent: any, _x: number, _y: number, _width: number, _height: number, _color: string): any { }
+
+    public addCircle(_parent: any, _x: number, _y: number, _width: number, _height: number, _color: string): any { }
 
     // stats
 
@@ -202,7 +248,7 @@ export class Case {
                 this.flatChildren = true
                 this.dynamicMode = true
                 break
-            case 'pan':
+            case 'move':
                 if (params.zoom === 'fit') this.dragPoint.direction = 'wait-right'
                 break
         }
@@ -245,8 +291,8 @@ export class Case {
             case 'largeImage':
                 this.zoomAnimate()
                 break
-            case 'pan':
-                this.panAnimate()
+            case 'move':
+                this.moveAnimate()
                 break
             case 'drag':
                 this.dragAnimate()
@@ -289,7 +335,7 @@ export class Case {
         }
     }
 
-    public panAnimate() {
+    public moveAnimate() {
         const { dragPoint } = this
         if (dragPoint.direction === 'wait-right') {
             setTimeout(() => {

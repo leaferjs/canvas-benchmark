@@ -4,6 +4,7 @@ import { Case } from './core/Case'
 export class HTMLCase extends Case {
 
     declare app: HTMLDivElement
+    declare rootNode: HTMLDivElement
 
     override async create() {
         const { view } = this
@@ -12,7 +13,7 @@ export class HTMLCase extends Case {
         view.appendChild(app)
 
         // must
-        this.app = this.canvas = app
+        this.app = this.canvas = this.rootNode = app
         await this.createContent()
         requestAnimationFrame(() => this.firstPaintEnd())
     }
@@ -40,13 +41,12 @@ export class HTMLCase extends Case {
     // get
 
     override updateElements(): void {
-        this.elements = this.app.childNodes as any
+        this.elements = this.rootNode.childNodes as any
     }
 
     override updateDragElements(): void {
-        const list = this.app.children
+        const list = this.flatChildren ? this.rootNode.children : this.rootNode.children[0].children
         this.dragElement = list[0]
-        this.dragPoint.y = this.startY - 5
         for (let i = 0; i < this.maxDragElements; i++) {
             this.dragElements.push(list[i])
         }
@@ -54,35 +54,38 @@ export class HTMLCase extends Case {
 
     // create
 
-    override createRects(): void {
-        const view = this.app
-        const { tenThousand, thousand, size, column, x, y } = this.getCreateLayout()
-
-        for (let i = 0; i < tenThousand; i++) {
-            this.createBlock(view, x + size * (i % column), y + size * Math.floor(i / column), this.getRotationColor(i * 3), i === tenThousand - 1 ? thousand : 0)
-        }
+    override addGroup(parent: any, x: number, y: number): any {
+        const node = document.createElement('div')
+        const { style } = node
+        style.position = 'absolute'
+        style.left = x + 'px'
+        style.top = y + 'px'
+        parent.appendChild(node)
+        return node
     }
 
-    protected createBlock(group: HTMLElement, startX: number, startY: number, hsl: string, thousand: number): void {
-        let y, rect, style, yCount = thousand ? thousand * 10 : 100
-        for (let i = 0; i < 100; i++) { // ten thousand
-            if (i % 10 === 0) startX += 10
-            y = startY
-            for (var j = 0; j < yCount; j++) {
-                if (j % 10 === 0) y += 10
-                rect = document.createElement('div')
-                style = rect.style
-                style.position = 'absolute'
-                style.left = startX + 'px'
-                style.top = y + 'px'
-                style.width = 10 + 'px'
-                style.height = 10 + 'px'
-                style.backgroundColor = hsl
-                group.appendChild(rect)
-                y += 12
-            }
-            startX += 12
-        }
+    override addRect(parent: any, x: number, y: number, width: number, height: number, color: string): any {
+        const node = document.createElement('div')
+        const { style } = node
+        style.position = 'absolute'
+        style.left = x + 'px'
+        style.top = y + 'px'
+        style.width = width + 'px'
+        style.height = height + 'px'
+        style.backgroundColor = color
+        parent.appendChild(node)
+    }
+
+    override addCircle(parent: any, x: number, y: number, width: number, height: number, color: string): any {
+        const node = document.createElement('div')
+        const { style } = node
+        style.position = 'absolute'
+        style.left = x + 'px'
+        style.top = y + 'px'
+        style.width = width + 'px'
+        style.height = height + 'px'
+        style.backgroundColor = color
+        parent.appendChild(node)
     }
 
     override async createLargeImage() {

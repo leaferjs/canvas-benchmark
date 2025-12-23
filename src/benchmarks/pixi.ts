@@ -5,6 +5,7 @@ import { Case } from './core/Case'
 export class PixiCase extends Case {
 
     declare app: Application
+    declare rootNode: Container
 
     override async create() {
         const { view, width, height } = this
@@ -17,6 +18,7 @@ export class PixiCase extends Case {
 
         // must
         this.app = app
+        this.rootNode = app.stage
         this.canvas = canvas
         await this.createContent()
         app.ticker.addOnce(() => this.firstPaintEnd())
@@ -47,13 +49,12 @@ export class PixiCase extends Case {
     // get
 
     override updateElements(): void {
-        this.elements = this.app.stage.children
+        this.elements = this.rootNode.children
     }
 
     override updateDragElements(): void {
-        const list = this.flatChildren ? this.app.stage.children : this.app.stage.children[0].children
+        const list = this.flatChildren ? this.rootNode.children : this.rootNode.children[0].children
         this.dragElement = list[0]
-        this.dragPoint.y = -5
         for (let i = 0; i < this.maxDragElements; i++) {
             this.dragElements.push(list[i])
         }
@@ -61,51 +62,33 @@ export class PixiCase extends Case {
 
     // create
 
-    override createRects(): void {
-        const view = this.app.stage
-        const { tenThousand, thousand, size, column, x, y } = this.getCreateLayout()
-
-        let group, startX: number, startY: number, color: string, lastThousand: number
-
-        for (var i = 0; i < tenThousand; i++) {
-
-            startX = x + size * (i % column)
-            startY = y + size * Math.floor(i / column)
-            color = this.getRotationColor(i * 3)
-            lastThousand = i === tenThousand - 1 ? thousand : 0
-
-            if (this.flatChildren) {
-                this.createBlock(view, startX, startY, color, lastThousand)
-            } else {
-                group = new Container()
-                group.x = startX
-                group.y = startY
-                group.eventMode = 'dynamic'
-                view.addChild(group)
-                this.createBlock(group, 0, 0, color, lastThousand)
-            }
-
-        }
+    override addGroup(parent: any, x: number, y: number): any {
+        const node = new Container()
+        node.x = x
+        node.y = y
+        node.eventMode = 'dynamic'
+        parent.addChild(node)
+        return node
     }
 
-    protected createBlock(group: Container, startX: number, startY: number, hsl: string, thousand: number): void {
-        let y, g: Graphics, yCount = thousand ? thousand * 10 : 100
-        for (let i = 0; i < 100; i++) {  // ten thousand
-            if (i % 10 === 0) startX += 10
-            y = startY
-            for (var j = 0; j < yCount; j++) {
-                if (j % 10 === 0) y += 10
-                g = new Graphics()
-                g.x = startX
-                g.y = y
-                g.rect(0, 0, 10, 10)
-                g.fill(hsl)
-                g.eventMode = 'dynamic'
-                group.addChild(g)
-                y += 12
-            }
-            startX += 12
-        }
+    override addRect(parent: any, x: number, y: number, width: number, height: number, color: string): any {
+        const node = new Graphics()
+        node.x = x
+        node.y = y
+        node.rect(0, 0, width, height)
+        node.fill(color)
+        node.eventMode = 'dynamic'
+        parent.addChild(node)
+    }
+
+    override addCircle(parent: any, x: number, y: number, width: number, height: number, color: string): any {
+        const node = new Graphics()
+        node.x = x
+        node.y = y
+        node.rect(0, 0, width, height)
+        node.fill(color)
+        node.eventMode = 'dynamic'
+        parent.addChild(node)
     }
 
     override async createLargeImage() {

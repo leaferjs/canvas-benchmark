@@ -1,6 +1,14 @@
-interface IStringObject {
+export interface IStringObject {
     [name: string]: string
 }
+
+export interface IEngineInfo {
+    name: string,
+    title: string,
+    color: string,
+    link: string
+}
+
 
 const baseDir = '' // 部署的基础目录
 
@@ -9,44 +17,39 @@ export const siteConfig = {
     largeImageUrl: baseDir + '/image/large.png', // 20000 * 20000px
 }
 
-export const enginesData = {
-    engineList: [
-        'pixi',
-        'konva',
-        'fabric',
-        'svg',
-        'html',
-        'leafer',
-        //'pxgrow'
-    ],
-    engineSiteMap: {
-        pixi: 'https://pixijs.com',
-        konva: 'https://konvajs.org',
-        fabric: 'https://fabricjs.com',
-        svg: 'https://developer.mozilla.org/en-US/docs/Web/SVG',
-        html: 'https://developer.mozilla.org/en-US/docs/Web/HTML',
-        leafer: 'https://www.leaferjs.com',
-        pxgrow: 'https://www.pxgrow.com',
-    } as IStringObject,
-    engineNameMap: {
-        pixi: 'PixiJS',
-        konva: 'Konva.js',
-        fabric: 'Fabric.js',
-        svg: 'SVG',
-        html: ' HTML',
-        leafer: 'LeaferJS',
-        pxgrow: 'PxGrow',
-    } as IStringObject,
-    engineColorMap: {
-        pixi: '#E72264',
-        konva: '#0D83CD',
-        fabric: '#0d50cdff',
-        svg: '#ff7b00ff',
-        html: '#f60000ff',
-        leafer: '#32cd79',
-        pxgrow: '#ff5676',
-    } as IStringObject,
 
+const engines: IEngineInfo[] = [
+    { name: 'pixi', title: 'PixiJS', color: '#E72264', link: 'https://pixijs.com' },
+    { name: 'konva', title: 'Konva.js', color: '#0D83CD', link: 'https://konvajs.org' },
+    { name: 'fabric', title: 'Fabric.js', color: '#0d50cdff', link: 'https://fabricjs.com' },
+    { name: 'svg', title: 'SVG', color: '#ff7b00ff', link: 'https://developer.mozilla.org/en-US/docs/Web/SVG' },
+    { name: 'html', title: 'HTML', color: '#f60000ff', link: 'https://developer.mozilla.org/en-US/docs/Web/HTML' },
+    { name: 'leafer', title: 'LeaferJS', color: '#32cd79', link: 'https://www.leaferjs.com' }
+]
+
+
+const engineList: string[] = []
+const engineNameMap: IStringObject = {}
+const engineColorMap: IStringObject = {}
+const engineSiteMap: IStringObject = {}
+
+engines.forEach(item => addEngine(item))
+
+export function addEngine(item: IEngineInfo): void {
+    engineList.push(item.name)
+    engineNameMap[item.name] = item.title
+    engineColorMap[item.name] = item.color
+    engineSiteMap[item.name] = item.link
+}
+
+export const enginesData = {
+
+    engines,
+
+    engineList,
+    engineNameMap,
+    engineColorMap,
+    engineSiteMap,
 
     // interactive
     modeList: [
@@ -62,7 +65,7 @@ export const enginesData = {
     sceneList: [
         'create',
         'zoom',
-        'pan',
+        'move',
         'drag',
         'dynamic',
         // 'image',
@@ -74,7 +77,7 @@ export const enginesData = {
     sceneNameMap: {
         create: 'create',
         zoom: 'zoom',
-        pan: 'pan',
+        move: 'move',
         drag: 'drag',
         dynamic: 'dynamic',
         image: 'image',
@@ -130,5 +133,3 @@ export const enginesData = {
         2048000: '2048000',
     } as IStringObject,
 }
-
-

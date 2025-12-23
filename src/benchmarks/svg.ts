@@ -1,4 +1,4 @@
-import { Case } from './core/Case'
+import { Case } from '../core/Case'
 
 
 let svgNS = 'http://www.w3.org/2000/svg'
@@ -7,8 +7,9 @@ export class SVGCase extends Case {
 
     declare app: HTMLElement
     declare rootNode: HTMLElement
+    declare canvas: HTMLElement
 
-    override async create() {
+    override async createApp() {
         const { view, width, height } = this
         const svg = document.createElementNS(svgNS, 'svg') as HTMLElement
         svg.setAttribute("style", `width:${width}px;height:${height}px;`)
@@ -21,7 +22,9 @@ export class SVGCase extends Case {
         // must
         this.app = this.rootNode = app
         this.canvas = app
-        await this.createContent()
+    }
+
+    override defineViewCompleted(): void {
         requestAnimationFrame(() => this.firstPaintEnd())
     }
 
@@ -35,27 +38,27 @@ export class SVGCase extends Case {
         this.app.style.transform = `translate(${x}px, ${y}px)`
     }
 
-    override setElementScale(element: HTMLElement, scale: number, x?: number, y?: number): void {
+    override setNodeScale(element: HTMLElement, scale: number, x?: number, y?: number): void {
         element.setAttribute('transform', `scale(${scale})`)
-        if (x !== undefined && y !== undefined) this.setElementPosition(element, x, y)
+        if (x !== undefined && y !== undefined) this.setNodePosition(element, x, y)
     }
 
-    override setElementPosition(element: HTMLElement, x: number, y: number): void {
+    override setNodePosition(element: HTMLElement, x: number, y: number): void {
         element.setAttribute('x', x as any as string)
         element.setAttribute('y', y as any as string)
     }
 
     // get
 
-    override updateElements(): void {
-        this.elements = this.rootNode.childNodes as any
+    override updateNodes(): void {
+        this.nodes = this.rootNode.childNodes as any
     }
 
-    override updateDragElements(): void {
+    override updateDragNodes(): void {
         const list = this.flatChildren ? this.rootNode.children : this.rootNode.children[0].children
-        this.dragElement = list[0]
-        for (let i = 0; i < this.maxDragElements; i++) {
-            this.dragElements.push(list[i])
+        this.dragNode = list[0]
+        for (let i = 0; i < this.maxDragNodes; i++) {
+            this.dragNodes.push(list[i])
         }
     }
 
@@ -76,30 +79,19 @@ export class SVGCase extends Case {
         node.setAttribute('height', height as any as string)
         node.setAttribute('fill', color)
         parent.appendChild(node)
+        return node
     }
 
-    override addCircle(parent: any, x: number, y: number, width: number, height: number, color: string): any {
-        const node = document.createElementNS(svgNS, 'rect')
-        node.setAttribute('x', x as any as string)
-        node.setAttribute('y', y as any as string)
-        node.setAttribute('width', width as any as string)
-        node.setAttribute('height', height as any as string)
-        node.setAttribute('fill', color)
-        parent.appendChild(node)
-    }
-
-    override async createLargeImage() {
+    override async addImage(parent: any, x: number, y: number, width: number, height: number, url: string): Promise<any> {
         await new Promise((resolve) => {
-
-            const view = this.app
-            const image = document.createElementNS(svgNS, "image") as HTMLElement
-            image.setAttribute("href", this.imageConfig.largeImageUrl)
-
-            image.onload = () => {
-                view.appendChild(image)
-                resolve(true)
-            }
-
+            const node = document.createElementNS(svgNS, "image") as HTMLElement
+            node.setAttribute('x', x as any as string)
+            node.setAttribute('y', y as any as string)
+            node.setAttribute('width', width as any as string)
+            node.setAttribute('height', height as any as string)
+            node.setAttribute("href", url)
+            parent.appendChild(node)
+            node.onload = () => resolve(node)
         })
     }
 

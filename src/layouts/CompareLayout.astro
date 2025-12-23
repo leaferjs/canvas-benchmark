@@ -1,6 +1,7 @@
 ---
 import Layout from './Layout.astro'
-import { enginesData } from '../benchmarks/config'
+import GitHubIcon from '../components/GitHubIcon.astro'
+import { enginesData } from '../config'
 
 const { engine } = Astro.props
 const {
@@ -23,13 +24,14 @@ const {
   <div id="nav">
     <div id="engines">
       <a
-        href="/"
+        href="https://github.com/leaferjs/canvas-benchmark"
         target="_blank"
+        id="logo"
         class="case-button engine"
-        style="color: black"
-        onclick="try { self.close() } catch (e) {}"
+        style="color: black;padding-left: 38px;"
       >
-        Canvas-Benchmark
+        <GitHubIcon />
+        Benchmark
       </a>
       {
         engineList.map((item) =>
@@ -89,7 +91,7 @@ const {
       </a>
     </div>
 
-    <div>
+    <div id="total-list">
       {
         totalList.map((item) => (
           <a
@@ -121,7 +123,7 @@ const {
           </a>
         ))
       }
-      <span>&nbsp;&nbsp;</span>
+      <span></span>
       {
         zoomList.map((item) => (
           <a
@@ -137,17 +139,22 @@ const {
         ))
       }
 
-      <span>&nbsp;&nbsp;</span>
+      <span></span>
       <a
         href={engineSiteMap[engine]}
         target="_blank"
         rel="noopener noreferrer"
         class="case-button zoom"
       >
-        🔗 visit {engineNameMap[engine]} website
+        🔗 {engineNameMap[engine]} website
       </a>
     </div>
   </div>
+
+  <div id="view"></div>
+
+  <div id="js-memory">JS Memory</div>
+  <div id="first-time">First Time</div>
 
   <a
     id="github-button"
@@ -156,22 +163,13 @@ const {
     target="_blank"
     rel="noopener noreferrer"
   >
-    <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
-      ><title>GitHub</title><path
-        d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"
-      ></path></svg
-    >
+    <GitHubIcon />
     View Source Code
   </a>
-
-  <div id="memory">JS Memory</div>
-  <div id="time">First Time</div>
-
-  <div id="view"></div>
 </Layout>
 <script>
-  import { siteConfig, enginesData } from '../benchmarks/config'
-  import { getUrlParam, getId } from '../benchmarks/core/h5'
+  import { siteConfig, enginesData } from '../config'
+  import { getUrlParam, getId } from '../core/h5'
 
   const { defaultScene, defaultMode, defaultZoom, defaultTotal } = enginesData
 
@@ -180,10 +178,15 @@ const {
       scene = sceneParam || defaultScene
     const modeParam = getUrlParam('mode'),
       mode = modeParam || defaultMode
-    const zoomParam = getUrlParam('zoom'),
-      zoom = zoomParam || defaultZoom
+    const zoomParam = getUrlParam('zoom')
+    let zoom = zoomParam || defaultZoom
     const totalParam = getUrlParam('total'),
       total = totalParam || String(defaultTotal)
+
+    if (scene === 'image' || scene === 'largeImage') {
+      getId('total-list').style.display = 'none'
+      zoom = 'fit'
+    }
 
     function getButtonLink(button: Element): string {
       const engineName = button.getAttribute('data-engine')
@@ -239,19 +242,19 @@ const {
       )
     })
 
-    getId('memory').addEventListener('click', () => {
+    getId('js-memory').addEventListener('click', () => {
       alert(
-        `Currently, only the JS thread memory is displayed. To view SVG/HTML memory usage, use the browser's memory manager: Chrome (Window > Task Manager), Edge (More tools > Browser Task Manager). \n\n当前显示仅为JS线程内存，SVG/HTML需通过浏览器查看内存占用: Chrome（窗口 > 任务管理器）， Edge（更多工具 > 浏览器任务管理器）。`
+        `Currently, only the JS thread memory is displayed. To view SVG/HTML/Canvas memory usage, use the browser's memory manager: Chrome (Window > Task Manager), Edge (More tools > Browser Task Manager). \n\n当前显示仅为JS线程内存，SVG/HTML/Canvas需通过浏览器查看内存占用: Chrome（窗口 > 任务管理器）， Edge（更多工具 > 浏览器任务管理器）。`
       )
     })
-    getId('time').addEventListener('click', () => {
+    getId('first-time').addEventListener('click', () => {
       alert(
         `Currently displayed as the first-screen rendering time. \n\n 当前显示为首屏渲染时间。`
       )
     })
   })
 </script>
-<style lang="scss">
+<style lang="scss" is:global>
   body {
     font-family: 'SF Mono', 'Monaco', 'Consolas', 'Courier New', monospace;
   }
@@ -263,12 +266,19 @@ const {
     right: 20px;
     bottom: 20px;
     background-color: #f2f2f2;
-    overflow: hidden;
   }
 
   #nav {
-    padding-top: 20px;
-    padding-left: 10px;
+    padding: 20px 0 10px 10px;
+  }
+
+  #logo {
+    svg {
+      position: absolute;
+      top: 24px;
+      left: 20px;
+      width: 22px;
+    }
   }
 
   #engines {
@@ -316,7 +326,7 @@ const {
     }
   }
 
-  #memory {
+  #js-memory {
     position: fixed;
     top: 205px;
     left: 105px;
@@ -330,7 +340,7 @@ const {
     }
   }
 
-  #time {
+  #first-time {
     position: fixed;
     top: 205px;
     left: 185px;
@@ -346,8 +356,10 @@ const {
 
   #github-button {
     position: absolute;
-    top: 47px;
-    right: 20px;
+    right: 0px;
+    bottom: 0px;
+    padding: 20px;
+    border-top-left-radius: 100px;
     fill: #777;
     color: #777;
     display: flex;
@@ -356,8 +368,9 @@ const {
     transition: fill 0.3s;
     font-size: 10px;
     font-weight: bold;
+    background-color: white;
     svg {
-      width: 60px;
+      width: 40px !important;
       margin-bottom: 10px;
     }
     &:hover {

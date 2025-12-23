@@ -1,13 +1,14 @@
-import { Application, Container, Graphics, Assets, Sprite } from 'pixi.js'
-import { Case } from './core/Case'
+import { Application, Container, Graphics, Assets, Sprite, Texture } from 'pixi.js'
+import { Case } from '../core/Case'
 
 
 export class PixiCase extends Case {
 
     declare app: Application
     declare rootNode: Container
+    declare canvas: HTMLCanvasElement
 
-    override async create() {
+    override async createApp() {
         const { view, width, height } = this
         const app = new Application()
         const canvas = document.createElement('canvas')
@@ -20,8 +21,10 @@ export class PixiCase extends Case {
         this.app = app
         this.rootNode = app.stage
         this.canvas = canvas
-        await this.createContent()
-        app.ticker.addOnce(() => this.firstPaintEnd())
+    }
+
+    override defineViewCompleted(): void {
+        this.app.ticker.addOnce(() => this.firstPaintEnd())
     }
 
     // set
@@ -36,27 +39,27 @@ export class PixiCase extends Case {
         this.app.stage.y = y
     }
 
-    override setElementScale(element: Graphics, scale: number, x?: number, y?: number): void {
+    override setNodeScale(element: Graphics, scale: number, x?: number, y?: number): void {
         element.scale = scale
-        if (x !== undefined && y !== undefined) this.setElementPosition(element, x, y)
+        if (x !== undefined && y !== undefined) this.setNodePosition(element, x, y)
     }
 
-    override setElementPosition(element: Graphics, x: number, y: number): void {
+    override setNodePosition(element: Graphics, x: number, y: number): void {
         element.x = x
         element.y = y
     }
 
     // get
 
-    override updateElements(): void {
-        this.elements = this.rootNode.children
+    override updateNodes(): void {
+        this.nodes = this.rootNode.children
     }
 
-    override updateDragElements(): void {
+    override updateDragNodes(): void {
         const list = this.flatChildren ? this.rootNode.children : this.rootNode.children[0].children
-        this.dragElement = list[0]
-        for (let i = 0; i < this.maxDragElements; i++) {
-            this.dragElements.push(list[i])
+        this.dragNode = list[0]
+        for (let i = 0; i < this.maxDragNodes; i++) {
+            this.dragNodes.push(list[i])
         }
     }
 
@@ -81,21 +84,23 @@ export class PixiCase extends Case {
         parent.addChild(node)
     }
 
-    override addCircle(parent: any, x: number, y: number, width: number, height: number, color: string): any {
-        const node = new Graphics()
-        node.x = x
-        node.y = y
-        node.rect(0, 0, width, height)
-        node.fill(color)
-        node.eventMode = 'dynamic'
-        parent.addChild(node)
-    }
+    override async addImage(parent: any, x: number, y: number, width: number, height: number, url: string): Promise<any> {
+        await new Promise((resolve) => {
+            const img = new Image()
+            img.src = url
+            img.onload = async () => {
+                const texture = Texture.from(img)
+                const node = new Sprite(texture)
+                node.x = x
+                node.y = y
+                node.width = width
+                node.height = height
+                parent.addChild(node)
+                resolve(node)
+            }
+        })
 
-    override async createLargeImage() {
-        const view = this.app.stage
-        const texture = await Assets.load(this.imageConfig.largeImageUrl)
-        const sprite = new Sprite(texture)
-        view.addChild(sprite)
+
     }
 
 }

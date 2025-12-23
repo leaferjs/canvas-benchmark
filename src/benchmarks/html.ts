@@ -1,12 +1,13 @@
-import { Case } from './core/Case'
+import { Case } from '../core/Case'
 
 
 export class HTMLCase extends Case {
 
     declare app: HTMLDivElement
     declare rootNode: HTMLDivElement
+    declare canvas: HTMLDivElement
 
-    override async create() {
+    override async createApp() {
         const { view } = this
         const app = document.createElement('div')
         app.style.transformOrigin = '0% 0%'
@@ -14,7 +15,9 @@ export class HTMLCase extends Case {
 
         // must
         this.app = this.canvas = this.rootNode = app
-        await this.createContent()
+    }
+
+    override defineViewCompleted(): void {
         requestAnimationFrame(() => this.firstPaintEnd())
     }
 
@@ -28,27 +31,27 @@ export class HTMLCase extends Case {
         this.app.style.transform = `translate(${x}px, ${y}px)`
     }
 
-    override setElementScale(element: HTMLElement, scale: number, x?: number, y?: number): void {
+    override setNodeScale(element: HTMLElement, scale: number, x?: number, y?: number): void {
         if (x !== undefined && y !== undefined) element.style.transform = `scale(${scale}) translate(${x}px, ${y}px)`
         else element.style.transform = `scale(${scale})`
     }
 
-    override setElementPosition(element: HTMLElement, x: number, y: number): void {
+    override setNodePosition(element: HTMLElement, x: number, y: number): void {
         element.style.left = x + 'px'
         element.style.top = y + 'px'
     }
 
     // get
 
-    override updateElements(): void {
-        this.elements = this.rootNode.childNodes as any
+    override updateNodes(): void {
+        this.nodes = this.rootNode.childNodes as any
     }
 
-    override updateDragElements(): void {
+    override updateDragNodes(): void {
         const list = this.flatChildren ? this.rootNode.children : this.rootNode.children[0].children
-        this.dragElement = list[0]
-        for (let i = 0; i < this.maxDragElements; i++) {
-            this.dragElements.push(list[i])
+        this.dragNode = list[0]
+        for (let i = 0; i < this.maxDragNodes; i++) {
+            this.dragNodes.push(list[i])
         }
     }
 
@@ -74,31 +77,21 @@ export class HTMLCase extends Case {
         style.height = height + 'px'
         style.backgroundColor = color
         parent.appendChild(node)
+        return node
     }
 
-    override addCircle(parent: any, x: number, y: number, width: number, height: number, color: string): any {
-        const node = document.createElement('div')
-        const { style } = node
-        style.position = 'absolute'
-        style.left = x + 'px'
-        style.top = y + 'px'
-        style.width = width + 'px'
-        style.height = height + 'px'
-        style.backgroundColor = color
-        parent.appendChild(node)
-    }
-
-    override async createLargeImage() {
+    override async addImage(parent: any, x: number, y: number, width: number, height: number, url: string): Promise<any> {
         await new Promise((resolve) => {
-
-            const view = this.app
-            const image = new Image()
-            image.src = this.imageConfig.largeImageUrl
-            image.onload = () => {
-                view.appendChild(image)
-                resolve(true)
-            }
-
+            const node = new Image()
+            const { style } = node
+            style.position = 'absolute'
+            style.left = x + 'px'
+            style.top = y + 'px'
+            style.width = width + 'px'
+            style.height = height + 'px'
+            node.src = url
+            parent.appendChild(node)
+            node.onload = () => resolve(node)
         })
     }
 

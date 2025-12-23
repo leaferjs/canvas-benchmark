@@ -1,13 +1,14 @@
 import { Canvas, Point, Rect, Group, FabricImage } from 'fabric'
-import { Case } from './core/Case'
+import { Case } from '../core/Case'
 
 
 export class FabricCase extends Case {
 
     declare app: Canvas
     declare rootNode: Canvas
+    declare canvas: HTMLCanvasElement
 
-    override async create() {
+    override async createApp() {
         const { view, width, height } = this
         const canvas = document.createElement('canvas')
         view.appendChild(canvas)
@@ -17,8 +18,10 @@ export class FabricCase extends Case {
         // must
         this.app = this.rootNode = app
         this.canvas = canvas
-        await this.createContent()
-        app.once('after:render', () => this.firstPaintEnd())
+    }
+
+    override defineViewCompleted(): void {
+        this.app.once('after:render', () => this.firstPaintEnd())
     }
 
     // set
@@ -29,18 +32,18 @@ export class FabricCase extends Case {
     }
 
     override setAppPosition(x: number, y: number): void {
-        this.app.absolutePan(new Point(x, y))
+        this.app.absolutePan(new Point(-x, -y))
     }
 
-    override setElementScale(element: Rect, scale: number, x?: number, y?: number): void {
+    override setNodeScale(element: Rect, scale: number, x?: number, y?: number): void {
         element.set({
             scaleX: scale,
             scaleY: scale
         })
-        if (x !== undefined && y !== undefined) this.setElementPosition(element, x, y)
+        if (x !== undefined && y !== undefined) this.setNodePosition(element, x, y)
     }
 
-    override setElementPosition(element: Rect, x: number, y: number): void {
+    override setNodePosition(element: Rect, x: number, y: number): void {
         element.set({
             left: x,
             top: y
@@ -50,15 +53,15 @@ export class FabricCase extends Case {
 
     // get
 
-    override updateElements(): void {
-        this.elements = this.app.getObjects()
+    override updateNodes(): void {
+        this.nodes = this.app.getObjects()
     }
 
-    override updateDragElements(): void {
+    override updateDragNodes(): void {
         const list = this.app.getObjects()
-        this.dragElement = list[0]
-        for (let i = 0; i < this.maxDragElements; i++) {
-            this.dragElements.push(list[i])
+        this.dragNode = list[0]
+        for (let i = 0; i < this.maxDragNodes; i++) {
+            this.dragNodes.push(list[i])
         }
     }
 
@@ -72,34 +75,26 @@ export class FabricCase extends Case {
     }
 
     override addRect(parent: any, x: number, y: number, width: number, height: number, color: string): any {
-        const rect = new Rect()
-        rect.left = x
-        rect.top = y
-        rect.height = 10
-        rect.width = 10
-        rect.fill = color
-        parent.add(rect)
+        const node = new Rect()
+        node.left = x
+        node.top = y
+        node.height = width
+        node.width = height
+        node.fill = color
+        parent.add(node)
+        return node
     }
 
-    override addCircle(parent: any, x: number, y: number, width: number, height: number, color: string): any {
-        const rect = new Rect()
-        rect.left = x
-        rect.top = y
-        rect.height = 10
-        rect.width = 10
-        rect.fill = color
-        parent.add(rect)
-    }
-
-    override async createLargeImage() {
+    override async addImage(parent: any, x: number, y: number, width: number, height: number, url: string): Promise<any> {
         await new Promise((resolve) => {
-
-            const view = this.app
-            FabricImage.fromURL(this.imageConfig.largeImageUrl).then(image => {
-                view.add(image)
-                resolve(true)
+            FabricImage.fromURL(url).then(node => {
+                node.left = x
+                node.top = y
+                node.scaleX = width / node.width
+                node.scaleY = height / node.height
+                parent.add(node)
+                resolve(node)
             })
-
         })
     }
 

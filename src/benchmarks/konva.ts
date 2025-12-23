@@ -1,5 +1,5 @@
 import Konva from 'konva'
-import { Case } from './core/Case'
+import { Case } from '../core/Case'
 
 
 const { Stage, Layer, Group, Rect, Image } = Konva
@@ -15,7 +15,11 @@ const data = {
 
 export class KonvaCase extends Case {
 
-    override async create() {
+    declare app: any
+    declare rootNode: any
+    declare canvas: HTMLCanvasElement
+
+    override async createApp() {
         const { width, height } = this
         const app = new Stage({ container: this.config.id, width, height })
         const layer = new Layer()
@@ -25,12 +29,14 @@ export class KonvaCase extends Case {
         this.app = app
         this.rootNode = layer
         this.canvas = layer.canvas._canvas
-        await this.createContent()
+    }
+
+    override defineViewCompleted(): void {
         const fn = () => {
+            this.rootNode.off('draw', fn)
             this.firstPaintEnd()
-            layer.off('draw', fn)
         }
-        layer.on('draw', fn)
+        this.rootNode.on('draw', fn)
     }
 
     // set
@@ -46,28 +52,28 @@ export class KonvaCase extends Case {
         this.app.y(y)
     }
 
-    override setElementScale(element: any, scale: number, x?: number, y?: number): void {
+    override setNodeScale(element: any, scale: number, x?: number, y?: number): void {
         element.scaleX(scale)
         element.scaleY(scale)
-        if (x !== undefined && y !== undefined) this.setElementPosition(element, x, y)
+        if (x !== undefined && y !== undefined) this.setNodePosition(element, x, y)
     }
 
-    override setElementPosition(element: any, x: number, y: number): void {
+    override setNodePosition(element: any, x: number, y: number): void {
         element.x(x)
         element.y(y)
     }
 
     // get
 
-    override updateElements(): void {
-        this.elements = this.rootNode.children
+    override updateNodes(): void {
+        this.nodes = this.rootNode.children
     }
 
-    override updateDragElements(): void {
+    override updateDragNodes(): void {
         const list = this.flatChildren ? this.rootNode.children : this.rootNode.children[0].children
-        this.dragElement = list[0]
-        for (let i = 0; i < this.maxDragElements; i++) {
-            this.dragElements.push(list[i])
+        this.dragNode = list[0]
+        for (let i = 0; i < this.maxDragNodes; i++) {
+            this.dragNodes.push(list[i])
         }
     }
 
@@ -89,27 +95,19 @@ export class KonvaCase extends Case {
         data.fill = color
         const node = new Rect(data)
         parent.add(node)
+        return node
     }
 
-    override addCircle(parent: any, x: number, y: number, width: number, height: number, color: string): any {
-        data.x = x
-        data.y = y
-        data.width = width
-        data.height = height
-        data.fill = color
-        const node = new Rect(data)
-        parent.add(node)
-    }
-
-    override async createLargeImage() {
+    override async addImage(parent: any, x: number, y: number, width: number, height: number, url: string): Promise<any> {
         await new Promise((resolve) => {
-
-            const view = this.app.children[0]
-            Image.fromURL(this.imageConfig.largeImageUrl, function (image) {
-                view.add(image)
-                resolve(true)
+            Image.fromURL(url, function (node) {
+                node.x(x)
+                node.y(y)
+                node.width(width)
+                node.height(height)
+                parent.add(node)
+                resolve(node)
             })
-
         })
     }
 

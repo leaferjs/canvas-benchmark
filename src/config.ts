@@ -1,14 +1,9 @@
-export interface IStringObject {
+import { engines } from './engines'
+import type { IEngineInfo } from './engines'
+
+interface IStringObject {
     [name: string]: string
 }
-
-export interface IEngineInfo {
-    name: string,
-    title: string,
-    color: string,
-    link: string
-}
-
 
 const baseDir = '' // 部署的基础目录
 
@@ -16,17 +11,6 @@ export const siteConfig = {
     baseDir,
     largeImageUrl: baseDir + '/image/large.png', // 20000 * 20000px
 }
-
-
-const engines: IEngineInfo[] = [
-    { name: 'pixi', title: 'PixiJS', color: '#E72264', link: 'https://pixijs.com' },
-    { name: 'konva', title: 'Konva.js', color: '#0D83CD', link: 'https://konvajs.org' },
-    { name: 'fabric', title: 'Fabric.js', color: '#0d50cdff', link: 'https://fabricjs.com' },
-    { name: 'svg', title: 'SVG', color: '#ff7b00ff', link: 'https://developer.mozilla.org/en-US/docs/Web/SVG' },
-    { name: 'html', title: 'HTML', color: '#f60000ff', link: 'https://developer.mozilla.org/en-US/docs/Web/HTML' },
-    { name: 'leafer', title: 'LeaferJS', color: '#32cd79', link: 'https://www.leaferjs.com' }
-]
-
 
 const engineList: string[] = []
 const engineNameMap: IStringObject = {}
@@ -68,7 +52,7 @@ export const enginesData = {
         'move',
         'drag',
         'dynamic',
-        // 'image',
+        'image',
         'largeImage',
         // 'svg',
         // 'largeSvg',
@@ -80,8 +64,8 @@ export const enginesData = {
         move: 'move',
         drag: 'drag',
         dynamic: 'dynamic',
-        image: 'image',
-        largeImage: '⏳️large-image',
+        image: 'image.1000*600px',
+        largeImage: '⏳️large-image.20000*20000px',
         svg: 'svg-image',
         largeSvg: 'large-svg-image',
     } as IStringObject,
@@ -132,4 +116,35 @@ export const enginesData = {
         1024000: '1024000',
         2048000: '2048000',
     } as IStringObject,
+}
+
+export interface ICaseParams {
+    total: number
+    scene: 'create' | 'zoom' | 'move' | 'drag' | 'dynamic' | 'image' | 'largeImage' | 'svg' | 'largeSvg'
+    mode: 'pointer' | 'draw'
+    zoom: '100' | 'fit'
+}
+
+
+export interface ICaseConfig {
+    id: string
+    navId?: string
+    firstTimeId?: string
+    jsMemory?: string
+    onCreated?: NoParamFunction
+}
+
+export interface NoParamFunction {
+    (): void
+}
+
+export interface IDragPoint {
+    x: number
+    y: number
+    direction: 'right' | 'left' | 'wait-right'
+}
+
+export interface IScaleData {
+    value: number
+    mode: 'in' | 'out' | 'wait-in' | 'wait-out'
 }

@@ -1,21 +1,24 @@
 import { Leafer, Group, Rect, Image, RenderEvent, ImageEvent } from 'leafer-ui'
-import { Case } from './core/Case'
+import { Case } from '../core/Case'
 
 
 export class LeaferCase extends Case {
 
     declare app: Leafer
     declare rootNode: Leafer
+    declare canvas: HTMLCanvasElement
 
-    override async create() {
+    override async createApp() {
         const { view, dynamicMode } = this
         const app = new Leafer({ view, usePartLayout: !dynamicMode, usePartRender: !dynamicMode })
 
         // must
         this.app = this.rootNode = app
         this.canvas = app.canvas.view
-        await this.createContent()
-        app.once(RenderEvent.END, () => this.firstPaintEnd())
+    }
+
+    override defineViewCompleted(): void {
+        this.app.once(RenderEvent.END, () => this.firstPaintEnd())
     }
 
     // set
@@ -30,27 +33,27 @@ export class LeaferCase extends Case {
         this.app.y = y
     }
 
-    override setElementScale(element: Rect, scale: number, x?: number, y?: number): void {
+    override setNodeScale(element: Rect, scale: number, x?: number, y?: number): void {
         element.scale = scale
-        if (x !== undefined && y !== undefined) this.setElementPosition(element, x, y)
+        if (x !== undefined && y !== undefined) this.setNodePosition(element, x, y)
     }
 
-    override setElementPosition(element: Rect, x: number, y: number): void {
+    override setNodePosition(element: Rect, x: number, y: number): void {
         element.x = x
         element.y = y
     }
 
     // get
 
-    override updateElements(): void {
-        this.elements = this.rootNode.children
+    override updateNodes(): void {
+        this.nodes = this.rootNode.children
     }
 
-    override updateDragElements(): void {
+    override updateDragNodes(): void {
         const list = this.flatChildren ? this.rootNode.children : this.rootNode.children[0].children as Rect[]
-        this.dragElement = list[0]
-        for (let i = 0; i < this.maxDragElements; i++) {
-            this.dragElements.push(list[i])
+        this.dragNode = list[0]
+        for (let i = 0; i < this.maxDragNodes; i++) {
+            this.dragNodes.push(list[i])
         }
     }
 
@@ -73,30 +76,24 @@ export class LeaferCase extends Case {
         node.fill = color
         node.draggable = true
         parent.add(node)
+        return node
     }
 
-    override addCircle(parent: any, x: number, y: number, width: number, height: number, color: string): any {
-        const node = new Rect(null)
-        node.x = x
-        node.y = y
-        node.height = width
-        node.width = height
-        node.fill = color
-        node.draggable = true
-        parent.add(node)
-    }
-
-    override async createLargeImage() {
+    override async addImage(parent: any, x: number, y: number, width: number, height: number, url: string): Promise<any> {
         await new Promise((resolve) => {
-
-            const view = this.app
-            const image = new Image({
-                url: this.imageConfig.largeImageUrl,
-            })
-            view.add(image)
-
-            image.once(ImageEvent.LOADED, () => resolve(true))
-
+            const node = new Image()
+            node.x = x
+            node.y = y
+            node.width = width
+            node.height = height
+            node.fill = {
+                type: 'image',
+                url,
+                mode: 'stretch',
+                changeful: true
+            }
+            parent.add(node)
+            node.once(ImageEvent.LOADED, () => resolve(node))
         })
     }
 

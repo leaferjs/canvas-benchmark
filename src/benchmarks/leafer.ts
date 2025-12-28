@@ -18,7 +18,8 @@ export class LeaferCase extends Case {
     }
 
     override defineViewCompleted(): void {
-        this.app.once(RenderEvent.END, () => this.firstPaintEnd())
+        if (this.app.viewCompleted) this.firstPaintEnd()
+        else this.app.once(RenderEvent.END, () => this.firstPaintEnd())
     }
 
     // set
@@ -86,12 +87,7 @@ export class LeaferCase extends Case {
             node.y = y
             node.width = width
             node.height = height
-            node.fill = {
-                type: 'image',
-                url,
-                mode: 'stretch',
-                changeful: true
-            }
+            node.url = url
             parent.add(node)
             node.once(ImageEvent.LOADED, () => resolve(node))
         })

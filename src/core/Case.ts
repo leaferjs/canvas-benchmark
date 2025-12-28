@@ -29,6 +29,17 @@ export class Case {
         largeImageHeight: 20000,
     }
 
+    public top = 180
+
+    public width = 1000
+    public height = 500
+
+    public startX = 0
+    public startY = 60
+
+    public maxDragNodes = 10
+    public maxScale = 3
+
     public nodeWidth = 10
     public nodeHeight = 10
 
@@ -45,13 +56,6 @@ export class Case {
 
     public created?: boolean
     public viewCompleted?: boolean
-
-    public top = 180 // 画布距离页面顶部的距离
-    public width = 1000
-    public height = 500
-    public startX = 0
-    public startY = 60
-    public maxDragNodes = 10
 
     public fitScale = 1
     public contentBounds = { x: 0, y: 0, width: 0, height: 0 }
@@ -112,9 +116,11 @@ export class Case {
 
         switch (params.scene) {
             case 'image':
+                this.startY = 0
                 this.params.total = 1000
                 this.nodeWidth = 10
                 this.nodeHeight = 6
+                this.maxScale = 50
                 break
             case 'largeImage':
                 this.params.total = 1
@@ -230,16 +236,16 @@ export class Case {
             y = startY
             for (var j = 0; j < yCount; j++) {
                 if (j % 10 === 0) y += this.nodeHeight
-                const url = await this.createImageUrl(1000, 600, num * 10000 + i * 10 + j + 1, hsl)
-                await this.addImage(parent, startX, y, this.nodeWidth, this.nodeHeight, url)
+                const data = await this.createImageUrl(1000, 600, num * 10000 + i * 10 + j + 1, hsl)
+                await this.addImage(parent, startX, y, this.nodeWidth, this.nodeHeight, data.url)
                 y += this.nodeHeight * 1.2
             }
             startX += this.nodeWidth * 1.2
         }
     }
 
-    // 模拟不重复的图片（每张1000 * 600px）
-    public async createImageUrl(width: number, height: number, count: number, color: string): Promise<any> {
+    // Simulate non-repeating images (each 1000 * 600px)
+    public async createImageUrl(width: number, height: number, count: number, color: string): Promise<{ url: string }> {
         return new Promise((resolve) => {
             const canvas = new OffscreenCanvas(width, height)
             const context = canvas.getContext('2d') as any as CanvasRenderingContext2D
@@ -262,7 +268,7 @@ export class Case {
 
             canvas.convertToBlob().then(blob => {
                 const blobURL = URL.createObjectURL(blob)
-                resolve(blobURL)
+                resolve({ url: blobURL })
             }).catch(e => {
                 console.error(e)
             })
@@ -398,7 +404,7 @@ export class Case {
     public zoomTest() {
         const { scaleData } = this
 
-        if (scaleData.value >= 3) {
+        if (scaleData.value >= this.maxScale) {
 
             if (!scaleData.mode.includes('out')) {
                 scaleData.mode = 'wait-out'
@@ -505,6 +511,10 @@ export class Case {
             })
             this.canvas.dispatchEvent(event)
         }
+    }
+
+    public generateId() {
+        return Date.now().toString(36) + Math.random().toString(36).slice(2)
     }
 
 }

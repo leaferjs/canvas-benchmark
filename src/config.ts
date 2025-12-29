@@ -48,9 +48,9 @@ export const enginesData = {
 
     sceneList: [
         'create',
-        'zoom',
-        'move',
         'drag',
+        'move',
+        'zoom',
         'dynamic',
         'image',
         'largeImage',

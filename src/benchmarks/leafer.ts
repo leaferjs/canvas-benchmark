@@ -18,8 +18,7 @@ export class LeaferCase extends Case {
     }
 
     override defineViewCompleted(): void {
-        if (this.app.viewCompleted) this.firstPaintEnd()
-        else this.app.once(RenderEvent.END, () => this.firstPaintEnd())
+        this.app.once(RenderEvent.END, () => this.firstPaintEnd())
     }
 
     // set

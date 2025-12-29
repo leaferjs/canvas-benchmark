@@ -37,11 +37,13 @@ export class Case {
     public startX = 0
     public startY = 60
 
+    public nodeWidth = 10
+    public nodeHeight = 10
+
     public maxDragNodes = 10
     public maxScale = 3
 
-    public nodeWidth = 10
-    public nodeHeight = 10
+    public endFirstPaintAfterCreate?: boolean
 
     public flatChildren?: boolean
     public dynamicMode?: boolean
@@ -96,6 +98,8 @@ export class Case {
         await this.createApp()
         await this.createContent()
 
+        if (this.endFirstPaintAfterCreate) this.firstPaintEnd()
+
         this.defineViewCompleted()
 
         this.createAnimate()
@@ -121,6 +125,7 @@ export class Case {
                 this.nodeWidth = 10
                 this.nodeHeight = 6
                 this.maxScale = 50
+                this.endFirstPaintAfterCreate = true
                 break
             case 'largeImage':
                 this.params.total = 1

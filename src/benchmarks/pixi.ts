@@ -99,8 +99,11 @@ export class PixiCase extends Case {
                 resolve(node)
             }
         })
+    }
 
-
+    public destroy() {
+        this.app.destroy()
+        super.destroy()
     }
 
 }

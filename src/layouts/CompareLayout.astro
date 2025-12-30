@@ -357,9 +357,8 @@ const {
   #github-button {
     position: absolute;
     right: 0px;
-    bottom: 0px;
+    top: 35px;
     padding: 20px;
-    border-top-left-radius: 100px;
     fill: #777;
     color: #777;
     display: flex;
@@ -376,6 +375,14 @@ const {
     &:hover {
       fill: #000;
       color: #000;
+    }
+  }
+
+  @media all and (orientation: portrait) {
+    #github-button {
+      bottom: 0px;
+      top: auto;
+      border-top-left-radius: 100px;
     }
   }
 </style>

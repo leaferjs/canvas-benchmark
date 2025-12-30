@@ -95,4 +95,9 @@ export class HTMLCase extends Case {
         })
     }
 
+    public destroy() {
+        this.app.remove()
+        super.destroy()
+    }
+
 }

@@ -95,4 +95,9 @@ export class SVGCase extends Case {
         })
     }
 
+    public destroy() {
+        this.app.remove()
+        super.destroy()
+    }
+
 }

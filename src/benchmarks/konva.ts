@@ -111,4 +111,9 @@ export class KonvaCase extends Case {
         })
     }
 
+    public destroy() {
+        this.app.destroy()
+        super.destroy()
+    }
+
 }

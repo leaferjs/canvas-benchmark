@@ -76,17 +76,16 @@ export class Case {
         Object.assign(this.config, config || {})
         window.addEventListener('load', async () => {
             this.view = this.config.id ? getId(this.config.id) : document.body
-            this.updateDomStyle()
+            this.updateView()
             requestAnimationFrame(async () => await this.init())
+        })
+        window.addEventListener('beforeunload', () => {
+            this.destroy()
         })
     }
 
 
     public async init() {
-        const { width, height } = this.view.getBoundingClientRect()
-        this.width = width
-        this.height = height
-
         this.updateParams()
         this.updateContentBounds()
 
@@ -105,10 +104,14 @@ export class Case {
         this.createAnimate()
     }
 
-    public updateDomStyle(): void {
+    public updateView(): void {
         const nav = getId(this.config.navId!).getBoundingClientRect()
         this.top = Math.ceil(nav.height)
         this.view.style.top = this.top + 'px'
+
+        const { width, height } = this.view.getBoundingClientRect()
+        this.width = width
+        this.height = height
     }
 
     public updateParams(): void {
@@ -145,11 +148,11 @@ export class Case {
     }
 
     public updateContentBounds(): void {
-        const { contentBounds, width, height, params } = this
+        const { contentBounds, width, height, params, imageConfig } = this
         switch (params.scene) {
             case 'largeImage':
-                contentBounds.width = this.imageConfig.largeImageWidth
-                contentBounds.height = this.imageConfig.largeImageHeight
+                contentBounds.width = imageConfig.largeImageWidth
+                contentBounds.height = imageConfig.largeImageHeight
                 break
             default:
                 const { tenThousand, thousand, size, ySize, column } = this.getCreateLayout()
@@ -483,8 +486,8 @@ export class Case {
         const { total } = this.params
         const tenThousand: number = Math.ceil(total / 10000)
         const thousand: number = total / 1000 % 10
-        const size = this.nodeWidth * 100 * 1.5
-        const ySize = this.nodeHeight * 100 * 1.5
+        const size = this.nodeWidth * 100 * 3 / 2
+        const ySize = this.nodeHeight * 100 * 3 / 2
         const column = tenThousand > 25 ? 10 : 5
         return { tenThousand, thousand, size, ySize, column, x: this.startX, y: this.startY }
     }
@@ -520,6 +523,11 @@ export class Case {
 
     public generateId() {
         return Date.now().toString(36) + Math.random().toString(36).slice(2)
+    }
+
+    public destroy() {
+        // @ts-ignore
+        this.app = this.rootNode = this.canvas = this.view = this.nodes = this.dragNode = this.dragNodes = null
     }
 
 }

@@ -92,4 +92,9 @@ export class LeaferCase extends Case {
         })
     }
 
+    public destroy() {
+        this.app.destroy(true)
+        super.destroy()
+    }
+
 }
